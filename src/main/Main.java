@@ -4,11 +4,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
+
 		ABIDecoder abiDecoder = new ABIDecoder();
 		abiDecoder.run();
-		
-		System.out.print("uguu");
 	}
 
 }

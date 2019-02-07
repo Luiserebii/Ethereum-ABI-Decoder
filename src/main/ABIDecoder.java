@@ -17,18 +17,26 @@ public class ABIDecoder {
 
 		for(String t : testFunctionStrings){
 			System.out.println("Test function string: " + t);
-			toCleanFunctionSig(t);
+			System.out.println(toCleanFunctionSig(t));
 
 		}
 	}
 
 	public String toCleanFunctionSig(String functionStr){
 
-	    String cleanSig = "";
+	    String cleanSig;
 	    String functionName = parseFunctionName(functionStr);
 	    String[] parameterTypes = parseParameterTypes(functionStr);
-
-
+	    //Build the first piece of the clean signature
+	    cleanSig = functionName + "(" + parameterTypes[0];
+	    //If we have more than 1 parameter, lets cycle through them and add commas...
+	    if(parameterTypes.length >= 2){
+	    	for(int i = 1; i < parameterTypes.length; i++){
+	    		cleanSig += "," + parameterTypes[i];
+	    	}
+	    }
+	    cleanSig += ")";
+	    		
 		return cleanSig;
 	}
 
@@ -50,10 +58,10 @@ public class ABIDecoder {
 			indexStart = str.indexOf("function") + 8;
 		}
 		functionName = str.substring(indexStart, indexEnd).trim();
-		
-		
-		System.out.println("Function Name: " + functionName);
-		
+
+
+		//System.out.println("Function Name: " + functionName);
+
 		return functionName;
 	}
 
@@ -73,7 +81,7 @@ public class ABIDecoder {
 	    		paramType = paramType.substring(0, paramType.indexOf(" "));
 	    	}
 	    	parameterTypes[i] = paramType;
-	    	System.out.println(paramType);
+	    	//System.out.println(paramType);
 	    }
 	    return parameterTypes;
 
