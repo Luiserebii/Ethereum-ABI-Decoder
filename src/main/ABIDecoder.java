@@ -25,7 +25,7 @@ public class ABIDecoder {
 	public String toCleanFunctionSig(String functionStr){
 
 	    String cleanSig = "";
-	    String functionName;
+	    String functionName = parseFunctionName(functionStr);
 	    String[] parameterTypes = parseParameterTypes(functionStr);
 
 
@@ -37,6 +37,24 @@ public class ABIDecoder {
 		String methodID = "";
 
 		return methodID;
+	}
+
+	public String parseFunctionName(String str){
+
+		String functionName;
+
+		int indexEnd = str.indexOf("(");
+		int indexStart = 0;
+		//If our function name has the function keyword specified...
+		if(str.contains("function")){
+			indexStart = str.indexOf("function") + 8;
+		}
+		functionName = str.substring(indexStart, indexEnd).trim();
+		
+		
+		System.out.println("Function Name: " + functionName);
+		
+		return functionName;
 	}
 
 	public String[] parseParameterTypes(String str){
