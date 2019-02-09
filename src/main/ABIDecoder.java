@@ -1,9 +1,20 @@
 package main;
 
+import org.bouncycastle.util.encoders.*;
+import org.apache.commons.lang3.StringUtils;
+
 public class ABIDecoder {
 
 	public ABIDecoder(){
 
+	}
+
+	public enum solidityTypes{
+		UINTEGER, INTEGER, ADDRESS, BOOL, BYTES, STRING
+	}
+
+	public enum Direction {
+		LEFT, RIGHT
 	}
 
 	public void run(){
@@ -20,7 +31,40 @@ public class ABIDecoder {
 			System.out.println(toCleanFunctionSig(t));
 
 		}
+
+		    String abc = padTo32Bytes(stringToHex("abc"), Direction.RIGHT);
+			System.out.println("ENCODED   " + abc);
+			System.out.println(abc.length());
+
 	}
+
+	public static String stringToHex(String str){
+		return new String(Hex.encode(str.getBytes()));
+	}
+
+	public static String padTo32Bytes(String hexStr, Direction direction){
+		return padBytes(hexStr, 32, direction);
+	}
+
+	public static String padBytes(String hexStr, int byteLength, Direction direction){
+		int length = hexStr.length();
+		int padding = byteLength - length;
+
+		if(direction == Direction.LEFT){
+			return StringUtils.repeat('0', padding) + hexStr;
+		} else if(direction == Direction.RIGHT){
+			return hexStr + StringUtils.repeat('0', padding);
+		} else {
+			return null;
+		}
+	}
+
+	/*
+	 *
+	 * ABI Function hashing functions
+	 *
+	 *
+	 * */
 
 	public String toCleanFunctionSig(String functionStr){
 
@@ -36,7 +80,7 @@ public class ABIDecoder {
 	    	}
 	    }
 	    cleanSig += ")";
-	    		
+
 		return cleanSig;
 	}
 
@@ -84,7 +128,33 @@ public class ABIDecoder {
 	    	//System.out.println(paramType);
 	    }
 	    return parameterTypes;
+	}
+
+	public solidityTypes parseParameterToEnum(String str){
+
+
+		if(str.equals("int")){
+			return solidityTypes.INTEGER;
+		} else if(str.equals("uint")){
+			return solidityTypes.UINTEGER;
+		} else if(str.equals("bool")){
+			return solidityTypes.BOOL;
+		} else if(str.equals("")){
+
+		}
+
+
+		return solidityTypes.INTEGER;
+
 
 	}
+
+	/*
+	 *
+	 * END OF ABI PARAMETER FUNCTIONS
+	 *
+	 *
+	 * */
+
 
 }
