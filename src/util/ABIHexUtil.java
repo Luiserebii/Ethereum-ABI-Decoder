@@ -10,7 +10,11 @@ public class ABIHexUtil {
 	}
 
 	public static String padTo32Bytes(String hexStr, Direction direction){
-		return padBytes(hexStr, 32, direction);
+		return padToBytes(hexStr, 32, direction);
+	}
+
+	public static String padToBytes(String hexStr, int byteNum, Direction direction){
+		return padBytes(hexStr, 2 * byteNum, direction);
 	}
 
 	public static String padBytes(String hexStr, int byteLength, Direction direction){

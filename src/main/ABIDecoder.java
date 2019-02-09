@@ -38,6 +38,8 @@ public class ABIDecoder {
 			System.out.println("ENCODED   " + abc);
 			System.out.println(abc.length());
 
+			System.out.println(ABIHexUtil.padTo32Bytes(Integer.toHexString(-2), Direction.LEFT));
+
 	}
 
 
