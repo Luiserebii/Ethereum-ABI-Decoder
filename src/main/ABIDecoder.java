@@ -2,6 +2,7 @@ package main;
 
 
 import util.Direction;
+import util.SolidityType;
 import util.ABIUtil;
 import util.ABIHexUtil;
 
@@ -12,10 +13,6 @@ public class ABIDecoder {
 
 	public ABIDecoder(){
 
-	}
-
-	public enum solidityTypes{
-		UINTEGER, INTEGER, ADDRESS, BOOL, BYTES, STRING
 	}
 
 
@@ -34,30 +31,30 @@ public class ABIDecoder {
 
 		}
 
-		    String abc = ABIHexUtil.padTo32Bytes(ABIHexUtil.stringToHex("abc"), Direction.RIGHT);
+		    String abc = ABIHexUtil.stringToHex32("abc");
 			System.out.println("ENCODED   " + abc);
 			System.out.println(abc.length());
 
-			System.out.println(ABIHexUtil.padTo32Bytes(Integer.toHexString(-2), Direction.LEFT));
+			System.out.println(ABIHexUtil.intToHex32(-2));
+			System.out.println("Testing bool");
+			System.out.println(ABIHexUtil.boolToHex32(true));
+
 
 	}
 
 
-	public solidityTypes parseParameterToEnum(String str){
-
+	public static SolidityType parseParameterToEnum(String str){
 
 		if(str.equals("int")){
-			return solidityTypes.INTEGER;
+			return SolidityType.INTEGER;
 		} else if(str.equals("uint")){
-			return solidityTypes.UINTEGER;
+			return SolidityType.UINTEGER;
 		} else if(str.equals("bool")){
-			return solidityTypes.BOOL;
+			return SolidityType.BOOL;
 		} else if(str.equals("")){
 
 		}
-
-
-		return solidityTypes.INTEGER;
+		return SolidityType.INTEGER;
 
 
 	}
