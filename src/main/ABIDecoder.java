@@ -39,6 +39,9 @@ public class ABIDecoder {
 			System.out.println("Testing bool");
 			System.out.println(ABIHexUtil.boolToHex32(true));
 
+			System.out.println(ABIHexUtil.addressToHex32("0x965D1C9987BD2c34e151E63d60AFf8E9dB6b1561"));
+			System.out.println(ABIHexUtil.addressToHex32("965D1C9987BD2c34e151E63d60AFf8E9dB6b1561"));
+			System.out.println(ABIHexUtil.bytesToHex32("0x123"));
 
 	}
 
@@ -54,7 +57,7 @@ public class ABIDecoder {
 		} else if(str.equals("")){
 
 		}
-		return SolidityType.INTEGER;
+		return null;
 
 
 	}

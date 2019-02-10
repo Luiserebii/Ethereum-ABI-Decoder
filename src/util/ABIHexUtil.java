@@ -6,6 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 public class ABIHexUtil {
 
 
+/*
+ *
+ * General functions
+ *
+ *
+ * */
+
+
+
 
 /*
  *
@@ -19,8 +28,22 @@ public class ABIHexUtil {
 		return padTo32Bytes(intToHex(integer), Direction.LEFT);
 	}
 
+	public static String uIntToHex32(long uint){
+		return padTo32Bytes(uIntToHex(uint), Direction.LEFT);
+	}
+
 	public static String boolToHex32(boolean bool){
 		return padTo32Bytes(boolToHex(bool), Direction.LEFT);
+	}
+
+	public static String addressToHex32(String str){
+		//Should perhaps add a "protection" clause here, should the string be over 66 chars, for example
+		return bytesToHex32(str);
+	}
+
+	public static String bytesToHex32(String str){
+		//Should perhaps add a "protection" clause here, should the string be over 66 chars, for example
+		return str.indexOf("0x") == 0 ? padTo32Bytes(str.trim().substring(2), Direction.LEFT) : padTo32Bytes(str.trim(), Direction.LEFT);
 	}
 
 	public static String stringToHex32(String str){
@@ -41,6 +64,9 @@ public class ABIHexUtil {
 		return Integer.toHexString(integer);
 	}
 
+	public static String uIntToHex(long uint){
+		return Long.toHexString(uint);
+	}
 
 	public static String boolToHex(boolean bool){
 		return bool == true ? "1" : "0";
