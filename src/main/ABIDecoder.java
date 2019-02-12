@@ -6,6 +6,9 @@ import util.ABIUtil;
 import util.ABIHexUtil;
 
 import org.bouncycastle.util.encoders.*;
+
+import java.math.BigInteger;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class ABIDecoder {
@@ -34,7 +37,7 @@ public class ABIDecoder {
 			System.out.println("ENCODED   " + abc);
 			System.out.println(abc.length());
 
-			System.out.println(ABIHexUtil.intToHex32(-2));
+			System.out.println(ABIHexUtil.intToHex32(BigInteger.valueOf(-2)));
 			System.out.println("Testing bool");
 			System.out.println(ABIHexUtil.boolToHex32(true));
 
@@ -42,7 +45,7 @@ public class ABIDecoder {
 			System.out.println(ABIHexUtil.addressToHex32("965D1C9987BD2c34e151E63d60AFf8E9dB6b1561"));
 			System.out.println(ABIHexUtil.bytesToHex32("0x123"));
 			System.out.println(ABIHexUtil.Hex32ToBool("0000000000000000000000000000000000000000000000000000000000000001"));
-			System.out.println(ABIHexUtil.Hex32ToInt("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"));
+			System.out.println(ABIHexUtil.Hex32ToSignedBigInt("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"));
 			System.out.println(ABIHexUtil.Hex32ToString("6162630000000000000000000000000000000000000000000000000000000000", 3));
 
 			System.out.println(ABIHexUtil.stringToHex32("abc"));

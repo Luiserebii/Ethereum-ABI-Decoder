@@ -3,6 +3,7 @@ package util;
 import org.bouncycastle.util.encoders.*;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,16 +26,18 @@ public class ABIHexUtil {
  * */
 
 	
-	public static int Hex32ToInt(String hex) {
-		return (int) Integer.parseInt(hex, 16);
+	//Alias for Hex32ToSignedBigInt()
+	public static BigInteger Hex32ToInt(String hex) {
+		return Hex32ToSignedBigInt(hex);
 	}
 	
-	public static long Hex32ToLong(String hex) {
-		return Long.parseLong(hex, 16);
-	}	
+	//Alias for Hex32ToUnsignedBigInt
+	public static BigInteger Hex32ToUInt(String hex) {
+		return Hex32ToUnsignedBigInt(hex);
+	}
 
 	public static boolean Hex32ToBool(String hex) {
-		int boolVal = Hex32ToInt(hex);
+		int boolVal = Hex32ToInteger(hex);
 		return boolVal == 1 ? true : false;
 	}
 	
@@ -52,11 +55,20 @@ public class ABIHexUtil {
 		//return null;
 	}
 	
+	/*
+	 * Utility functions for hex to type conversions
+	 * 
+	 * */
+	public static BigInteger Hex32ToSignedBigInt(String hex) {
+		return new BigInteger(Hex.decode(hex));
+	}
 	
+	public static BigInteger Hex32ToUnsignedBigInt(String hex) {
+		return new BigInteger(hex, 16);
+	}	
 	
-	//Alias for Hex32ToLong; not sure if this is semantically ok, really...?
-	public static long Hex32ToUInt(String hex) {
-		return Hex32ToLong(hex);
+	public static int Hex32ToInteger(String hex) {
+		return Integer.parseInt(hex, 16);
 	}
 	
 
@@ -68,12 +80,12 @@ public class ABIHexUtil {
  * */
 
 
-	public static String intToHex32(int integer){
+	public static String intToHex32(BigInteger integer){
 		return padTo32Bytes(intToHex(integer), Direction.LEFT);
 	}
 
-	public static String uIntToHex32(long uint){
-		return padTo32Bytes(uIntToHex(uint), Direction.LEFT);
+	public static String uIntToHex32(BigInteger integer){
+		return padTo32Bytes(uIntToHex(integer), Direction.LEFT);
 	}
 
 	public static String boolToHex32(boolean bool){
@@ -104,12 +116,12 @@ public class ABIHexUtil {
  * */
 
 
-	public static String intToHex(int integer){
-		return Integer.toHexString(integer);
+	public static String intToHex(BigInteger integer){
+		return signedBigIntToHex(integer);
 	}
 
-	public static String uIntToHex(long uint){
-		return Long.toHexString(uint);
+	public static String uIntToHex(BigInteger integer){
+		return unsignedBigIntToHex(integer);
 	}
 
 	public static String boolToHex(boolean bool){
@@ -120,6 +132,15 @@ public class ABIHexUtil {
 		return new String(Hex.encode(str.getBytes()));
 	}
 
+	public static String signedBigIntToHex(BigInteger integer){
+		return integer.toByteArray().toString();
+	}
+
+	public static String unsignedBigIntToHex(BigInteger integer){
+		return new BigInteger(integer.toString(), 16).toString();
+	}	
+	
+	
 /*
  *
  *
