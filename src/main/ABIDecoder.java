@@ -1,6 +1,5 @@
 package main;
 
-
 import util.Direction;
 import util.SolidityType;
 import util.ABIUtil;
@@ -42,7 +41,11 @@ public class ABIDecoder {
 			System.out.println(ABIHexUtil.addressToHex32("0x965D1C9987BD2c34e151E63d60AFf8E9dB6b1561"));
 			System.out.println(ABIHexUtil.addressToHex32("965D1C9987BD2c34e151E63d60AFf8E9dB6b1561"));
 			System.out.println(ABIHexUtil.bytesToHex32("0x123"));
+			System.out.println(ABIHexUtil.Hex32ToBool("0000000000000000000000000000000000000000000000000000000000000001"));
+			System.out.println(ABIHexUtil.Hex32ToInt("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"));
+			System.out.println(ABIHexUtil.Hex32ToString("6162630000000000000000000000000000000000000000000000000000000000", 3));
 
+			System.out.println(ABIHexUtil.stringToHex32("abc"));
 	}
 
 

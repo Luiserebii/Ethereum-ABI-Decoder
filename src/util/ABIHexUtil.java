@@ -1,6 +1,9 @@
 package util;
 
 import org.bouncycastle.util.encoders.*;
+
+import java.io.UnsupportedEncodingException;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class ABIHexUtil {
@@ -13,8 +16,49 @@ public class ABIHexUtil {
  *
  * */
 
+	
+/*
+ * 
+ * 
+ * 
+ * 
+ * */
 
+	
+	public static int Hex32ToInt(String hex) {
+		return (int) Integer.parseInt(hex, 16);
+	}
+	
+	public static long Hex32ToLong(String hex) {
+		return Long.parseLong(hex, 16);
+	}	
 
+	public static boolean Hex32ToBool(String hex) {
+		int boolVal = Hex32ToInt(hex);
+		return boolVal == 1 ? true : false;
+	}
+	
+	public static String Hex32ToString(String hex, int byteLength) {
+		String hexParsed = hex.substring(0, byteLength * 2);
+		//System.out.println("hexPARSED" + hexParsed);
+		try {
+			//System.out.println(Hex.decode(hexParsed.getBytes()));
+			return new String(Hex.decode(hexParsed.getBytes()), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} 
+		//return null;
+	}
+	
+	
+	
+	//Alias for Hex32ToLong; not sure if this is semantically ok, really...?
+	public static long Hex32ToUInt(String hex) {
+		return Hex32ToLong(hex);
+	}
+	
 
 /*
  *
