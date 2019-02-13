@@ -70,8 +70,28 @@ public class ABIDecoder {
 		testCases.add(test1);
 		testCases.add(test2);
 		testCases.add(test3);
+		testCases.add(test4);
+		testCases.add(test5);
+		testCases.add(test6);		
+		testCases.add(test7);
+		testCases.add(test8);
+		testCases.add(test9);
+		testCases.add(test10);
+		testCases.add(test11);		
 		
-		System.out.println(decode());
+		
+		for(String[] test : testCases) {
+			System.out.println("FUNCTION INPUT: " + test[0]); 
+			System.out.println("ABI: " + test[1]); 
+			String res = decode(test[0], test[1]);
+			System.out.println("\n" + res + "\n\n\n");
+			if(res.equals(test[2])) {
+				System.out.println("     1 TEST PASSED: SUCCESS!!!");
+			} else {
+				System.out.println("     0 FAILED!");
+			}
+			
+		}
 		
 		//System.out.println("RES: " + ABIUtil.toCleanFunctionSig());
 		System.out.println("\n" + 
