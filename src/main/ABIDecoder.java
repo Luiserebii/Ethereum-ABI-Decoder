@@ -23,7 +23,7 @@ public class ABIDecoder {
 
 
 	public void run(){
-
+		
 		realTest();
 		//noobTest();
 		
@@ -33,17 +33,26 @@ public class ABIDecoder {
 	
 	
 	
-	public String decode(String rawFunction, String ABI) {
+	public String decode(String rawFunction, String abi) {
 		
-		String total = "";
-		
-		
+		String total = decodeParams(ABIUtil.parseParameterTypes(rawFunction), ABIUtil.parseABI(abi));
+		//Mini-test to tell if we're decoding our params correctly
+//		for(String s : ABIUtil.parseABI(abi)) {
+//			System.out.print(s + "|||");
+//		}
 		
 		return total;
 	}
 	
-	public String decodeParams(String[] parsedParams, String parsedABI) {
-		return null;
+	public String decodeParams(String[] parsedParams, String[] parsedABI) {
+		String total = "[";
+		
+		
+		
+		
+		//Close string
+		total += "]";
+		return total;
 	}
 	
 	
