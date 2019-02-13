@@ -15,10 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 public class ABIDecoder {
 
 	
-	
+//	private int ABIPointer;
 	
 	public ABIDecoder(){
-
+//		ABIPointer = 0;
 	}
 
 
@@ -35,19 +35,60 @@ public class ABIDecoder {
 	
 	public String decode(String rawFunction, String abi) {
 		
-		String total = decodeParams(ABIUtil.parseParameterTypes(rawFunction), ABIUtil.parseABI(abi));
+		String total = decodeParams(ABIUtil.parseParameterTypes(rawFunction), ABIUtil.parseABI(abi), 0);
 		//Mini-test to tell if we're decoding our params correctly
 //		for(String s : ABIUtil.parseABI(abi)) {
 //			System.out.print(s + "|||");
 //		}
+		if(total.indexOf(',') == -1) { total = total.substring(1, total.length() - 1); }
 		
 		return total;
 	}
 	
-	public String decodeParams(String[] parsedParams, String[] parsedABI) {
+	public String decodeParams(String[] parsedParams, String[] parsedABI, int ABIPointer) {
 		String total = "[";
 		
 		
+		for(String param : parsedParams) {
+			if(param.contains("uint")) {
+				//convert thing at ABIPointer
+				BigInteger integer = ABIHexUtil.Hex32ToUInt(parsedABI[ABIPointer]);
+				
+				//add to total
+				total += integer.toString();
+				
+				//move forward
+				ABIPointer++;
+	
+			} else if(param.contains("int")) {
+				//convert thing at ABIPointer
+				BigInteger integer = ABIHexUtil.Hex32ToInt(parsedABI[ABIPointer]);
+				
+				//add to total
+				total += integer.toString();
+				
+				//move forward
+				ABIPointer++;
+	
+			} else if(param.contains("string")) {
+				
+				//Get length  TODO: Consider using Hex32ToInt instead
+				System.out.println(parsedABI[ABIPointer]);
+				int strLength = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				System.out.println(strLength);
+				//For each byte, convert the hex into string
+				StringBuilder paramStr = new StringBuilder();
+				for(int i = 0; i < strLength; i++) {
+					paramStr.append(ABIHexUtil.Hex32ToString(parsedABI[ABIPointer+1], 32));
+				}
+				//Concatenate strings
+				total += paramStr.toString();
+				//Move forward 1 + string.length
+				ABIPointer += 1 + strLength;
+			}			
+			
+			
+		}
 		
 		
 		//Close string
