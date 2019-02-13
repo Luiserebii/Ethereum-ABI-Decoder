@@ -50,7 +50,7 @@ public class ABIDecoder {
 		
 		
 		for(String param : parsedParams) {
-			if(param.contains("uint")) {
+			if(param.contains("uint") && !param.contains("[")) {
 				//convert thing at ABIPointer
 				BigInteger integer = ABIHexUtil.Hex32ToUInt(parsedABI[ABIPointer]);
 				
@@ -60,7 +60,7 @@ public class ABIDecoder {
 				//move forward
 				ABIPointer++;
 	
-			} else if(param.contains("int")) {
+			} else if(param.contains("int") && !param.contains("[")) {
 				//convert thing at ABIPointer
 				BigInteger integer = ABIHexUtil.Hex32ToInt(parsedABI[ABIPointer]);
 				
@@ -70,8 +70,7 @@ public class ABIDecoder {
 				//move forward
 				ABIPointer++;
 	
-			} else if(param.contains("string")) {
-				
+			} else if(param.contains("string")&& !param.contains("[")) {
 				
 				//Find offset
 				int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
@@ -87,9 +86,58 @@ public class ABIDecoder {
 				//System.out.println(parsedABI[tempPointer+1]);
 				//Concatenate strings
 				total += strparam;
-				//Move forward 2
+				//Move forward 1
 				ABIPointer += 1;
-			}			
+			} else if(param.contains("[]")) {
+				
+				//Find arr offset
+				int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				//Temporary pointer we can use with the parsedABI array
+				int tempPointer = arrOffset / 32;
+				
+				//Number of elements
+				int elementNum = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
+				tempPointer++;
+				
+				String[] arrParams = new String[elementNum];
+				//Loop for array parameters
+				for(int i = 0; i < elementNum; i++) {
+					arrParams[i] = parsedABI[tempPointer + i];
+				}
+				
+				String arrparam = "[" + decodeParams(arrParams, parsedABI, ABIPointer) + "]";
+				
+				total += arrparam;
+				ABIPointer += 1;
+			} else if(param.contains("[")) {
+				
+				//Find arr offset
+				int arrOffset =0; 
+						//ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				//Temporary pointer we can use with the parsedABI array
+				int tempPointer = arrOffset / 32;
+				
+				//Number of elements
+				//char eoew = param.charAt(param.lastIndexOf('[')+1);
+				int elementNum = Character.getNumericValue(param.charAt(param.lastIndexOf('[')+1));
+				System.out.println(elementNum);
+				String[] arrABI = new String[elementNum];
+				//Loop for array parameters
+				for(int i = 0; i < elementNum; i++) {
+					//System.out.println(i);
+					arrABI[i] = parsedABI[tempPointer + i];
+					//System.out.println("ANAL: " + arrParams[i]);
+				}
+				
+				String[] arrParams = new String[elementNum];
+				for(int i = 0; i < elementNum; i++) {
+					arrParams[i] = param.substring(0, param.lastIndexOf('['));
+				}
+				
+				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";				
+				total += arrparam;
+				ABIPointer++;
+			}		
 			
 			
 		}
