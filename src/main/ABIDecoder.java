@@ -24,8 +24,8 @@ public class ABIDecoder {
 
 	public void run(){
 
-
-		noobTest();
+		realTest();
+		//noobTest();
 		
 	}
 
@@ -79,25 +79,27 @@ public class ABIDecoder {
 		testCases.add(test10);
 		testCases.add(test11);		
 		
-		
+		/*
+		 * Iterate through test cases, print expected values, and whether succeeds or fails
+		 * 
+		 * */
 		for(String[] test : testCases) {
+			
+			System.out.println("=============================================================");
 			System.out.println("FUNCTION INPUT: " + test[0]); 
-			System.out.println("ABI: " + test[1]); 
+			System.out.println("ABI: " + test[1]);
+			System.out.println("EXPECTING: " + test[2]); 
 			String res = decode(test[0], test[1]);
-			System.out.println("\n" + res + "\n\n\n");
+			if(res == null) { res = "null"; } else if(res.equals("")) { res = "empty value"; }
+			System.out.println("\n" + res + "\n\n");
 			if(res.equals(test[2])) {
 				System.out.println("     1 TEST PASSED: SUCCESS!!!");
 			} else {
 				System.out.println("     0 FAILED!");
 			}
-			
-		}
-		
-		//System.out.println("RES: " + ABIUtil.toCleanFunctionSig());
-		System.out.println("\n" + 
-				"0x0000000000000000000000000000000000000000000000000000b29c26f344fe\n" + 
-				"196383738119422");
-		
+			System.out.println("=============================================================");
+			System.out.println("\n\n");
+		}		
 		
 	}
 	
