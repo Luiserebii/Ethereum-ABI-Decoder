@@ -72,19 +72,23 @@ public class ABIDecoder {
 	
 			} else if(param.contains("string")) {
 				
+				
+				//Find offset
+				int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				//Temporary pointer we can use with the parsedABI array
+				int tempPointer = stringOffset / 32;
+				
 				//Get length  TODO: Consider using Hex32ToInt instead
-				System.out.println(parsedABI[ABIPointer]);
-				int strLength = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-				System.out.println(strLength);
-				//For each byte, convert the hex into string
-				StringBuilder paramStr = new StringBuilder();
-				for(int i = 0; i < strLength; i++) {
-					paramStr.append(ABIHexUtil.Hex32ToString(parsedABI[ABIPointer+1], 32));
-				}
+				int byteLength = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
+				//System.out.println(byteLength);
+				
+				
+				String strparam = ABIHexUtil.Hex32ToString(parsedABI[tempPointer+1], byteLength);
+				//System.out.println(parsedABI[tempPointer+1]);
 				//Concatenate strings
-				total += paramStr.toString();
-				//Move forward 1 + string.length
-				ABIPointer += 1 + strLength;
+				total += strparam;
+				//Move forward 2
+				ABIPointer += 1;
 			}			
 			
 			
