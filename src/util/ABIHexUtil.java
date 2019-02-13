@@ -132,8 +132,43 @@ public class ABIHexUtil {
 		return new String(Hex.encode(str.getBytes()));
 	}
 
+	
+	//////////////////
+	//INCOMPLETE: DON'T USE
 	public static String signedBigIntToHex(BigInteger integer){
-		return integer.toByteArray().toString();
+		//if
+		if(integer.signum() == -1) {
+			byte[] ass = integer.negate().toByteArray();
+			byte[] total = new byte[32];
+			System.arraycopy(new byte[32-ass.length],0,total,0,32-ass.length);
+			System.arraycopy(ass,0,total,32-ass.length,ass.length);
+			
+			//total = ~total;
+			//Flip the shit
+			StringBuffer result = new StringBuffer();
+			for (byte b : total) {
+			    result.append(String.format("%02X", ~b));
+			}
+			System.out.println("ANAL " + result.toString());
+			
+		}
+		System.out.println("FUCK: " + integer.bitLength());
+		
+		//BigInt to Binary //toString(2)
+		String binary = integer.toString(2);
+		//Twi's complement of binary
+		//binary to hex bytes
+		//bytestostring
+		
+		byte[] bytes = {9, 10, 11, 15, 16};
+		StringBuffer result = new StringBuffer();
+		for (byte b : bytes) {
+		    result.append(String.format("%02X ", b));
+		    result.append(" "); // delimiter
+		}
+		System.out.println(result.toString());
+		
+		return new String(Hex.encode(integer.toByteArray()));
 	}
 
 	public static String unsignedBigIntToHex(BigInteger integer){
