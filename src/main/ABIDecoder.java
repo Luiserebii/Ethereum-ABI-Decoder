@@ -46,16 +46,38 @@ public class ABIDecoder {
 		return total;
 	}
 	
+	/*
+	 * decodeParams(String[] [parsedParams, String[] parsedABI, int ABIPointer)
+	 * 
+	 * The idea of this function is to loop through each parameter we expect from the ones given,
+	 * and thus determine their type. For example, "int8" can tell us to convert the corresponding first ABI value as
+	 * a value, and "string" can tell us to look at the pointer, switch to the specified 32-byte value in the ABI 
+	 * (which, is the bytelength of the string, as it is the 1st value for strings)
+	 * 
+	 * ABIPointer should ALWAYS represent the beginning of the initial value/pointer list which corresponds with the parsed parameters.
+	 * 
+	 * parsedABI is simply an array with the 32-byte hex values split.
+	 * 
+	 * The function is recursive in order to allow for entering "new scopes" (i.e. multi-dimensional arrays) easily,
+	 * as looping through this can quickly become complex, and recursion is great for algorithms which face an
+	 * unknown depth search
+	 * 
+	 * When recursion occurs, it is assumed that the parsedABI remains the same string[], whereas the ABIPointer should
+	 * point to the new set of initial ABI value/pointer list. Therefore, parsedParams and ABIPointer must remain IN SYNC.
+	 * 
+	 * */
+	
 	public String decodeParams(String[] parsedParams, String[] parsedABI, int ABIPointer) {
 		String total = "";
 		
-		
+		//Iterate through array of parameter types
+		//ABIPointer assumed to point to the very first element in the "parameter scope"
 		for(int p = 0; p < parsedParams.length; p++) {
 			String param = parsedParams[p];
 			//System.out.println("PARAM: " + param);
 			
 			if(param.contains("uint") && !param.contains("[")) {
-				//convert thing at ABIPointer
+				//Convert integer at ABIPointer, i.e. the parameter 32-byte (which is a value)
 				BigInteger integer = ABIHexUtil.Hex32ToUInt(parsedABI[ABIPointer]);
 				
 				//add to total
@@ -78,30 +100,29 @@ public class ABIDecoder {
 				
 				//Find offset
 				int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-				//Temporary pointer we can use with the parsedABI array
+				//Temporary pointer we can use with the parsedABI array - allows us to see where the actual value starts
 				int tempPointer = stringOffset / 32;
 				
-				//Get length  TODO: Consider using Hex32ToInt instead
+				//Get length at 1st 32-byte element pointer points to  TODO: Consider using Hex32ToInt instead
 				int byteLength = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
-				//System.out.println(byteLength);
 				
-				
+				//Using the byteLength, we can now determine how to parse the string on the 2nd
 				String strparam = ABIHexUtil.Hex32ToString(parsedABI[tempPointer+1], byteLength);
-				//System.out.println(parsedABI[tempPointer+1]);
+				
 				//Concatenate strings
 				total += strparam;
-				//Move forward 1
+				//Move forward 1, onto the next set of parameter values/pointers
 				ABIPointer += 1;
 			} else if(param.contains("bytes")&& !param.contains("[")) {
 				
-				//Convert thing at ABIPointer
+				//Convert bytes at ABIPointer
 				String bytes = ABIHexUtil.Hex32ToBytes(parsedABI[ABIPointer]);
 				//System.out.println("BYTES: " + bytes);
 				
 				//add to total
 				total += bytes;
 				
-				//move forward
+				//Move forward 1, onto the next set of parameter values/pointers
 				ABIPointer++;
 				
 				
