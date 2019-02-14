@@ -26,7 +26,6 @@ public class ABIDecoder {
 		
 		realTest();
 		//noobTest();
-		
 	}
 
 	
@@ -37,10 +36,10 @@ public class ABIDecoder {
 		
 		String[] decodedParams = ABIUtil.parseParameterTypes(rawFunction);
 
-//		//Mini-test to tell if we're decoding our params correctly
-//		for(String s : ABIUtil.parseABI(abi)) {
-//			System.out.print(s + "|||\n");
-//		}		
+		//Mini-test to tell if we're decoding our params correctly
+		for(String s : ABIUtil.parseABI(abi)) {
+			System.out.print(s + "|||\n");
+		}		
 		
 		String total = decodeParams(decodedParams, ABIUtil.parseABI(abi), 0);
 
@@ -77,7 +76,10 @@ public class ABIDecoder {
 			String param = parsedParams[p];
 			//System.out.println("PARAM: " + param);
 			
+			//System.out.println("OUR INT ABIPOINTER VAL: " + ABIPointer);
+			
 			if(param.contains("uint") && !param.contains("[")) {
+				
 				//Convert integer at ABIPointer, i.e. the parameter 32-byte (which is a value)
 				BigInteger integer = ABIHexUtil.Hex32ToUInt(parsedABI[ABIPointer]);
 				
@@ -87,7 +89,7 @@ public class ABIDecoder {
 				//move forward
 				ABIPointer++;
 	
-			} else if(param.contains("int") && !param.contains("[")) {
+			} else if(param.contains("int") && !param.contains("[")) {				
 				//convert thing at ABIPointer
 				BigInteger integer = ABIHexUtil.Hex32ToInt(parsedABI[ABIPointer]);
 				
@@ -99,25 +101,13 @@ public class ABIDecoder {
 	
 			} else if(param.contains("string")&& !param.contains("[")) {
 				
-				/*
-				 * 
-				 * Since types with multiple values (e.g. dynamic values/strings/arrs) 
-				 * will ONLY have an offset if there is more than one of them, in the params,
-				 * we need to check if there it is the only one or not; if it is not, 
-				 * skip over and set tempPointer to the regular ABIPointer's value,
-				 * as we skip right to the "actual values"
-				 * 
-				 */
+
 				int tempPointer;
-				if(parsedParams.length != 1) {
-					//Find offset
-					int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-					//Temporary pointer we can use with the parsedABI array - allows us to see where the actual value starts
-					tempPointer = stringOffset / 32;
-				} else {
-					tempPointer = ABIPointer;
-					
-				}
+				//Find offset
+				int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				//Temporary pointer we can use with the parsedABI array - allows us to see where the actual value starts
+				tempPointer = stringOffset / 32;
+
 				//Get length at 1st 32-byte element pointer points to  TODO: Consider using Hex32ToInt instead
 				int byteLength = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
 				
@@ -126,6 +116,7 @@ public class ABIDecoder {
 				
 				//Concatenate strings
 				total += strparam;
+				System.out.println(strparam);
 				//Move forward 1, onto the next set of parameter values/pointers
 				ABIPointer += 1;
 			} else if(param.contains("bytes")&& !param.contains("[")) {
@@ -228,8 +219,12 @@ public class ABIDecoder {
 				 */
 				if(parsedParams.length != 1) {
 					//Find offset pointing to "real values" of dynamic array
+					//System.out.println("THE FUCKING ABIPOINTER WE'RE FUCKING USING HERE GODDAMMIT:  " + ABIPointer);
+					//System.out.println("THE FUCKING HEX WE'RE SUPPOSED TO BE FUCKING USING:  " + parsedABI[ABIPointer]);
 					int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);	
+					//System.out.println("THIS IS OUR FUCKING ARROFFSET BEFORE ALL THIS SHIT HAPPENS:  " + arrOffset);
 					tempPointer = arrOffset/32;
+					//System.out.println("WHERE ARE WE FINDING THAT OFFSET???  " + tempPointer);
 					
 				} else {
 					tempPointer = ABIPointer;	
@@ -248,8 +243,8 @@ public class ABIDecoder {
 				 * 
 				 */
 				int elementNum = Character.getNumericValue(param.charAt(param.indexOf('[')+1));
-				System.out.println("RIGHT BEFORE WE FIND THAT CHAR:  " + param);
-				System.out.println("WHAT IS THAT CHAR WE FOUND???:  " + Character.getNumericValue(param.charAt(param.indexOf('[')+1)));
+				//System.out.println("RIGHT BEFORE WE FIND THAT CHAR:  " + param);
+				//System.out.println("WHAT IS THAT CHAR WE FOUND???:  " + Character.getNumericValue(param.charAt(param.indexOf('[')+1)));
 				
 //				//
 //				String[] arrABI = new String[elementNum];
@@ -283,7 +278,7 @@ public class ABIDecoder {
 					paramType += param.substring(firstRBracePos + 1);
 				}	
 				
-				System.out.println("PARAM TYPE OF ARR: " + paramType);
+				//System.out.println("PARAM TYPE OF ARR: " + paramType);
 				
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
@@ -301,6 +296,7 @@ public class ABIDecoder {
 				 * which is likely NOT quite the case
 				 * 
 				 * */				
+				//System.out.println("VALUE ABIPOINTER WE'RE FUCKING PASSING GODDAMMIT   " + tempPointer);
 				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";				
 				
 				//Add to the total
@@ -347,6 +343,7 @@ public class ABIDecoder {
 		
 		ArrayList<String[]> testCases = new ArrayList<String[]>();
 		
+		//String[] test0 = {"function baz(uint256, uint256[4])", "000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000032000000000000000000000000000000000000000000000000000000000000006400000000000000000000000000000000000000000000000000000000000000c8", "10, [20, 50, 100, 200]"};
 		String[] test1 = {"function baz(int8)", "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", "-2"};
 		String[] test2 = {"function baz(int80)", "0x0000000000000000000000000000000000000000000000000000b29c26f344fe", "196383738119422"};
 		String[] test3 = {"function baz(uint32)", "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", "4294967294"};
@@ -360,6 +357,10 @@ public class ABIDecoder {
 		String[] test11 = {"function baz(uint256[] a,uint[] b,uint256[] c)", "0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000015af1d78b58c400000000000000000000000000000000000000000000000000015af1d78b58c4000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000001bc16d674ec800000000000000000000000000000000000000000000000000001bc16d674ec80000", "[6, 5], [25000000000000000000, 25000000000000000000], [2000000000000000000, 2000000000000000000]"};				
 		
 		
+		//String[] test30 = {"function baz(uint256, uint256[4])", "000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000032000000000000000000000000000000000000000000000000000000000000006400000000000000000000000000000000000000000000000000000000000000c8", "64, [20, 50, 100, 200]"};
+		//testCases.add(test30);
+		
+		//testCases.add(test0);
 		testCases.add(test1);
 		testCases.add(test2);
 		testCases.add(test3);
@@ -368,7 +369,7 @@ public class ABIDecoder {
 		testCases.add(test6);		
 		testCases.add(test7);
 		testCases.add(test8);
-		testCases.add(test9);
+		//testCases.add(test9);
 		testCases.add(test10);
 		testCases.add(test11);		
 		
