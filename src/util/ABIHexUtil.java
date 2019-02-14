@@ -71,6 +71,10 @@ public class ABIHexUtil {
 		return Integer.parseInt(hex, 16);
 	}
 	
+	public static String Hex32ToBytes(String hex) {
+		return hex.indexOf("0x") == 0 ? hex : "0x" + hex;
+	}
+	
 
 /*
  *

@@ -35,21 +35,25 @@ public class ABIDecoder {
 	
 	public String decode(String rawFunction, String abi) {
 		
-		String total = decodeParams(ABIUtil.parseParameterTypes(rawFunction), ABIUtil.parseABI(abi), 0);
+		String[] decodedParams = ABIUtil.parseParameterTypes(rawFunction);
+		
+		String total = decodeParams(decodedParams, ABIUtil.parseABI(abi), 0);
 		//Mini-test to tell if we're decoding our params correctly
 //		for(String s : ABIUtil.parseABI(abi)) {
 //			System.out.print(s + "|||");
 //		}
-		if(total.indexOf(',') == -1) { total = total.substring(1, total.length() - 1); }
 		
 		return total;
 	}
 	
 	public String decodeParams(String[] parsedParams, String[] parsedABI, int ABIPointer) {
-		String total = "[";
+		String total = "";
 		
 		
-		for(String param : parsedParams) {
+		for(int p = 0; p < parsedParams.length; p++) {
+			String param = parsedParams[p];
+			//System.out.println("PARAM: " + param);
+			
 			if(param.contains("uint") && !param.contains("[")) {
 				//convert thing at ABIPointer
 				BigInteger integer = ABIHexUtil.Hex32ToUInt(parsedABI[ABIPointer]);
@@ -88,6 +92,19 @@ public class ABIDecoder {
 				total += strparam;
 				//Move forward 1
 				ABIPointer += 1;
+			} else if(param.contains("bytes")&& !param.contains("[")) {
+				
+				//Convert thing at ABIPointer
+				String bytes = ABIHexUtil.Hex32ToBytes(parsedABI[ABIPointer]);
+				//System.out.println("BYTES: " + bytes);
+				
+				//add to total
+				total += bytes;
+				
+				//move forward
+				ABIPointer++;
+				
+				
 			} else if(param.contains("[]")) {
 				
 				//Find arr offset
@@ -102,17 +119,19 @@ public class ABIDecoder {
 				String[] arrParams = new String[elementNum];
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
-					arrParams[i] = parsedABI[tempPointer + i];
+					arrParams[i] = param.substring(0, param.lastIndexOf('['));
+							//parsedABI[tempPointer + i];
+					//System.out.println("ARRPARAMS: " + arrParams[i]);
 				}
 				
-				String arrparam = "[" + decodeParams(arrParams, parsedABI, ABIPointer) + "]";
+				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";
 				
 				total += arrparam;
 				ABIPointer += 1;
 			} else if(param.contains("[")) {
 				
 				//Find arr offset
-				int arrOffset =0; 
+				int arrOffset = 0; 
 						//ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
 				//Temporary pointer we can use with the parsedABI array
 				int tempPointer = arrOffset / 32;
@@ -120,7 +139,7 @@ public class ABIDecoder {
 				//Number of elements
 				//char eoew = param.charAt(param.lastIndexOf('[')+1);
 				int elementNum = Character.getNumericValue(param.charAt(param.lastIndexOf('[')+1));
-				System.out.println(elementNum);
+				//System.out.println(elementNum);
 				String[] arrABI = new String[elementNum];
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
@@ -132,19 +151,23 @@ public class ABIDecoder {
 				String[] arrParams = new String[elementNum];
 				for(int i = 0; i < elementNum; i++) {
 					arrParams[i] = param.substring(0, param.lastIndexOf('['));
+					//System.out.println("ARRPARAMS: " + arrParams[i]);
 				}
 				
 				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";				
 				total += arrparam;
 				ABIPointer++;
 			}		
-			
+
+			if(parsedParams.length - 1 != p) {
+				total +=", ";
+			}
 			
 		}
-		
+
 		
 		//Close string
-		total += "]";
+		//total += "]";
 		return total;
 	}
 	
