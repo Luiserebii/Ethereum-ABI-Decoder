@@ -128,55 +128,122 @@ public class ABIDecoder {
 				
 			} else if(param.contains("[]")) {
 				
-				//Find arr offset
+				//Find offset pointing to "real values" of dynamic array
 				int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-				//Temporary pointer we can use with the parsedABI array
-				int tempPointer = arrOffset / 32;
 				
-				//Number of elements
+				/*
+				 * Temporary pointer we can use with the parsedABI array
+				 */
+				int tempPointer = arrOffset / 32;
+				/* 
+				 * This temporary pointer is intended to work as a pointer which STARTS initialized at the "real values"
+				 * of the array. Since we will need to pass a pointer which will point to a "new scope" (set of parameter
+				 * "value/pointer" 32-byte hex values), we use this as a value we can advance.
+				 * 
+				 */
+				
+				
+				//Obtain number of elements from the first set of "real array" values
 				int elementNum = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
+				//Advance the tempPointer; this will thus point at the beginning of the "value/pointer" 32-byte hex values
 				tempPointer++;
 				
+				/* 
+				 * Generate a list of types the array has in scope; do we have ints, or even int[]s? Important to know, as we
+				 * want to loop this
+				 * This should thus generate an array corresponding with the LENGTH of the array (as we expect the same 
+				 * number of parameters as the LENGTH) and the TYPES expected (thus will be duplicates~~~)
+				 */
 				String[] arrParams = new String[elementNum];
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
-					arrParams[i] = param.substring(0, param.lastIndexOf('['));
-							//parsedABI[tempPointer + i];
-					//System.out.println("ARRPARAMS: " + arrParams[i]);
+					arrParams[i] = param.substring(0, param.lastIndexOf('[')); //parse out everything before the "[", which should give us the next "sub"type
 				}
-				
+
+				/*
+				 * Pass the array's types as arrParams, regular parsedABI, and tempPointer POINTING to the set of values
+				 * corresponding to array's types as arrParams
+				 * 
+				 * Since this is recursive, we expect it to simply "create its own scope" to parse through with a new total,
+				 * which will get passed back to us, which we surround in array braces
+				 * 
+				 * */
 				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";
 				
+				//Add to the total
 				total += arrparam;
+				
+				//Advance it forward to the next parameter "value/pointer" 32-byte hex value
 				ABIPointer += 1;
 			} else if(param.contains("[")) {
 				
-				//Find arr offset
-				int arrOffset = 0; 
-						//ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				//Find offset pointing to "real values" of static array
+				int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				
 				//Temporary pointer we can use with the parsedABI array
 				int tempPointer = arrOffset / 32;
+				/* 
+				 * This temporary pointer is intended to work as a pointer which STARTS initialized at the "real values"
+				 * of the array. Since we will need to pass a pointer which will point to a "new scope" (set of parameter
+				 * "value/pointer" 32-byte hex values), we use this as a value we can advance.
+				 * 
+				 */				
+				
 				
 				//Number of elements
-				//char eoew = param.charAt(param.lastIndexOf('[')+1);
+				/* 
+				 * Since we have the number of elements within the passed type, lets grab the "first batch", i.e. everything before the first []
+				 * e.g. int[][3] --> int[]
+				 * 
+				 * Therefore, int[][3] will assume that it is a int[3] which contains 3 amount of int[]s
+				 * 
+				 * This does not quite correspond to how multi-dimensional arrays are outlined (should be the int[] which contains x amount of int[3]s),
+				 * which is likely where our current bug lies
+				 * 
+				 */
 				int elementNum = Character.getNumericValue(param.charAt(param.lastIndexOf('[')+1));
-				//System.out.println(elementNum);
-				String[] arrABI = new String[elementNum];
-				//Loop for array parameters
-				for(int i = 0; i < elementNum; i++) {
-					//System.out.println(i);
-					arrABI[i] = parsedABI[tempPointer + i];
-					//System.out.println("ANAL: " + arrParams[i]);
-				}
 				
+//				//
+//				String[] arrABI = new String[elementNum];
+//				//Loop for array parameters
+//				for(int i = 0; i < elementNum; i++) {
+//					//System.out.println(i);
+//					arrABI[i] = parsedABI[tempPointer + i];
+//					//System.out.println("ANAL: " + arrParams[i]);
+//				}
+				
+				/* 
+				 * Generate a list of types the array has in scope; do we have ints, or even int[]s? Important to know, as we
+				 * want to loop this
+				 * This should thus generate an array corresponding with the LENGTH of the array (as we expect the same 
+				 * number of parameters as the LENGTH) and the TYPES expected (thus will be duplicates~~~)
+				 * 
+				 * Similarly as above, we assume everything before the LAST [ is the "next set" of containing types
+				 * 
+				 */
 				String[] arrParams = new String[elementNum];
 				for(int i = 0; i < elementNum; i++) {
 					arrParams[i] = param.substring(0, param.lastIndexOf('['));
-					//System.out.println("ARRPARAMS: " + arrParams[i]);
 				}
+	
 				
+				/*
+				 * Pass the array's types as arrParams, regular parsedABI, and tempPointer POINTING to the set of values
+				 * corresponding to array's types as arrParams
+				 * 
+				 * Since this is recursive, we expect it to simply "create its own scope" to parse through with a new total,
+				 * which will get passed back to us, which we surround in array braces
+				 * 
+				 * Following from above, we make the assumption that tempPointer points to the int[] piece of the int[][3],
+				 * which is likely NOT quite the case
+				 * 
+				 * */				
 				String arrparam = "[" + decodeParams(arrParams, parsedABI, tempPointer) + "]";				
+				
+				//Add to the total
 				total += arrparam;
+				
+				//Advance it forward to the next parameter "value/pointer" 32-byte hex value			
 				ABIPointer++;
 			}		
 
@@ -188,7 +255,6 @@ public class ABIDecoder {
 
 		
 		//Close string
-		//total += "]";
 		return total;
 	}
 	
