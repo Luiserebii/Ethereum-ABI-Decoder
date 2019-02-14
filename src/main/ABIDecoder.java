@@ -37,10 +37,10 @@ public class ABIDecoder {
 		
 		String[] decodedParams = ABIUtil.parseParameterTypes(rawFunction);
 
-		//Mini-test to tell if we're decoding our params correctly
-		for(String s : ABIUtil.parseABI(abi)) {
-			System.out.print(s + "|||\n");
-		}		
+//		//Mini-test to tell if we're decoding our params correctly
+//		for(String s : ABIUtil.parseABI(abi)) {
+//			System.out.print(s + "|||\n");
+//		}		
 		
 		String total = decodeParams(decodedParams, ABIUtil.parseABI(abi), 0);
 
@@ -247,7 +247,9 @@ public class ABIDecoder {
 				 * which is likely where our current bug lies
 				 * 
 				 */
-				int elementNum = Character.getNumericValue(param.charAt(param.lastIndexOf('[')+1));
+				int elementNum = Character.getNumericValue(param.charAt(param.indexOf('[')+1));
+				System.out.println("RIGHT BEFORE WE FIND THAT CHAR:  " + param);
+				System.out.println("WHAT IS THAT CHAR WE FOUND???:  " + Character.getNumericValue(param.charAt(param.indexOf('[')+1)));
 				
 //				//
 //				String[] arrABI = new String[elementNum];
@@ -280,6 +282,8 @@ public class ABIDecoder {
 				if(firstRBracePos + 1 != param.length()) {
 					paramType += param.substring(firstRBracePos + 1);
 				}	
+				
+				System.out.println("PARAM TYPE OF ARR: " + paramType);
 				
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
