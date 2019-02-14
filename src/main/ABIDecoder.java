@@ -140,7 +140,7 @@ public class ABIDecoder {
 				//Move forward 1, onto the next set of parameter values/pointers
 				ABIPointer++;			
 				
-			} else if(param.contains("[]")) {
+			} else if(param.indexOf("[") != -1 && param.indexOf("]") == param.indexOf("[") + 1) {
 				
 				/*
 				 * Since types with multiple values (e.g. dynamic values/strings/arrs) 
@@ -185,9 +185,18 @@ public class ABIDecoder {
 				 * number of parameters as the LENGTH) and the TYPES expected (thus will be duplicates~~~)
 				 */
 				String[] arrParams = new String[elementNum];
+				
+				int firstBracePos = param.indexOf('[');
+				
+				//Parse out everything surrounding the FIRST "[]", which should give us the next "sub"type
+				String paramType = param.substring(0, firstBracePos); 		
+				if(firstBracePos + 2 != param.length()) {
+					paramType += param.substring(firstBracePos + 2);
+				}	
+				
 				//Loop for array parameters
 				for(int i = 0; i < elementNum; i++) {
-					arrParams[i] = param.substring(0, param.lastIndexOf('[')); //parse out everything before the "[", which should give us the next "sub"type
+					arrParams[i] = paramType;
 				}
 
 				/*
@@ -205,7 +214,7 @@ public class ABIDecoder {
 				
 				//Advance it forward to the next parameter "value/pointer" 32-byte hex value
 				ABIPointer += 1;
-			} else if(param.contains("[")) {
+			} else if(param.indexOf("[") != -1 && param.indexOf("]") != -1) {
 				
 				/*
 				 * Temporary pointer we can use with the parsedABI array
@@ -262,7 +271,20 @@ public class ABIDecoder {
 				for(int i = 0; i < elementNum; i++) {
 					arrParams[i] = param.substring(0, param.lastIndexOf('['));
 				}
-	
+				
+				int firstLBracePos = param.indexOf('[');
+				int firstRBracePos = param.indexOf(']');
+				
+				//Parse out everything surrounding the FIRST "[]", which should give us the next "sub"type
+				String paramType = param.substring(0, firstLBracePos); 		
+				if(firstRBracePos + 1 != param.length()) {
+					paramType += param.substring(firstRBracePos + 1);
+				}	
+				
+				//Loop for array parameters
+				for(int i = 0; i < elementNum; i++) {
+					arrParams[i] = paramType;
+				}	
 				
 				/*
 				 * Pass the array's types as arrParams, regular parsedABI, and tempPointer POINTING to the set of values
