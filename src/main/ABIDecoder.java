@@ -36,13 +36,14 @@ public class ABIDecoder {
 	public String decode(String rawFunction, String abi) {
 		
 		String[] decodedParams = ABIUtil.parseParameterTypes(rawFunction);
+
+		//Mini-test to tell if we're decoding our params correctly
+		for(String s : ABIUtil.parseABI(abi)) {
+			System.out.print(s + "|||\n");
+		}		
 		
 		String total = decodeParams(decodedParams, ABIUtil.parseABI(abi), 0);
-		//Mini-test to tell if we're decoding our params correctly
-//		for(String s : ABIUtil.parseABI(abi)) {
-//			System.out.print(s + "|||");
-//		}
-		
+
 		return total;
 	}
 	
@@ -98,11 +99,25 @@ public class ABIDecoder {
 	
 			} else if(param.contains("string")&& !param.contains("[")) {
 				
-				//Find offset
-				int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-				//Temporary pointer we can use with the parsedABI array - allows us to see where the actual value starts
-				int tempPointer = stringOffset / 32;
-				
+				/*
+				 * 
+				 * Since types with multiple values (e.g. dynamic values/strings/arrs) 
+				 * will ONLY have an offset if there is more than one of them, in the params,
+				 * we need to check if there it is the only one or not; if it is not, 
+				 * skip over and set tempPointer to the regular ABIPointer's value,
+				 * as we skip right to the "actual values"
+				 * 
+				 */
+				int tempPointer;
+				if(parsedParams.length != 1) {
+					//Find offset
+					int stringOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+					//Temporary pointer we can use with the parsedABI array - allows us to see where the actual value starts
+					tempPointer = stringOffset / 32;
+				} else {
+					tempPointer = ABIPointer;
+					
+				}
 				//Get length at 1st 32-byte element pointer points to  TODO: Consider using Hex32ToInt instead
 				int byteLength = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
 				
@@ -123,28 +138,43 @@ public class ABIDecoder {
 				total += bytes;
 				
 				//Move forward 1, onto the next set of parameter values/pointers
-				ABIPointer++;
-				
+				ABIPointer++;			
 				
 			} else if(param.contains("[]")) {
 				
-				//Find offset pointing to "real values" of dynamic array
-				int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
+				/*
+				 * Since types with multiple values (e.g. dynamic values/strings/arrs) 
+				 * will ONLY have an offset if there is more than one of them, in the params,
+				 * we need to check if there it is the only one or not; if it is not, 
+				 * skip over and set tempPointer to the regular ABIPointer's value,
+				 * as we skip right to the "actual values"
+				 * 
+				 */
+				
+
 				
 				/*
 				 * Temporary pointer we can use with the parsedABI array
 				 */
-				int tempPointer = arrOffset / 32;
+				int tempPointer;
 				/* 
 				 * This temporary pointer is intended to work as a pointer which STARTS initialized at the "real values"
 				 * of the array. Since we will need to pass a pointer which will point to a "new scope" (set of parameter
 				 * "value/pointer" 32-byte hex values), we use this as a value we can advance.
 				 * 
 				 */
-				
+				if(parsedParams.length != 1) {
+					//Find offset pointing to "real values" of dynamic array
+					int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);	
+					tempPointer = arrOffset/32;
+					
+				} else {
+					tempPointer = ABIPointer;	
+				}
 				
 				//Obtain number of elements from the first set of "real array" values
 				int elementNum = ABIHexUtil.Hex32ToInteger(parsedABI[tempPointer]);
+				
 				//Advance the tempPointer; this will thus point at the beginning of the "value/pointer" 32-byte hex values
 				tempPointer++;
 				
@@ -177,17 +207,24 @@ public class ABIDecoder {
 				ABIPointer += 1;
 			} else if(param.contains("[")) {
 				
-				//Find offset pointing to "real values" of static array
-				int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);
-				
-				//Temporary pointer we can use with the parsedABI array
-				int tempPointer = arrOffset / 32;
+				/*
+				 * Temporary pointer we can use with the parsedABI array
+				 */
+				int tempPointer;
 				/* 
 				 * This temporary pointer is intended to work as a pointer which STARTS initialized at the "real values"
 				 * of the array. Since we will need to pass a pointer which will point to a "new scope" (set of parameter
 				 * "value/pointer" 32-byte hex values), we use this as a value we can advance.
 				 * 
-				 */				
+				 */
+				if(parsedParams.length != 1) {
+					//Find offset pointing to "real values" of dynamic array
+					int arrOffset = ABIHexUtil.Hex32ToInteger(parsedABI[ABIPointer]);	
+					tempPointer = arrOffset/32;
+					
+				} else {
+					tempPointer = ABIPointer;	
+				}				
 				
 				
 				//Number of elements
@@ -258,6 +295,24 @@ public class ABIDecoder {
 		return total;
 	}
 	
+	
+	
+	/*
+	 * 
+	 *    ==============================
+	 * 
+	 *      THE CURRENT BAD ASSUMPTION
+	 * 
+	 *    ==============================
+	 * 
+	 * We assume dynamic values/values with more than one "REAL" value to describe the type
+	 * will always have a pointer
+	 * 
+	 * However, if it is the only one, this is simply not the case!
+	 * 
+	 * Therefore, let's check if there's only one, and if there is, just DON'T move.
+	 * 
+	 * */
 	
 	
 	
