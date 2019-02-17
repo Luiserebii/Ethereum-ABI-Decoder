@@ -265,9 +265,6 @@ public class ABIDecoder {
 				 * 
 				 */
 				String[] arrParams = new String[elementNum];
-				for(int i = 0; i < elementNum; i++) {
-					arrParams[i] = param.substring(0, param.lastIndexOf('['));
-				}
 				
 				int firstLBracePos = param.indexOf('[');
 				int firstRBracePos = param.indexOf(']');
